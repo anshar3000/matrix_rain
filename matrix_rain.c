@@ -172,7 +172,7 @@ void matrix_rain()
 		stream_info[i] = (stream) {-1, 0, 0};
 	}
 
-	const int probability_of_new_stream = 8; // out of 1024
+	const int probability_of_new_stream = 6; // out of 1024
 
 	while(true) 
 	{
