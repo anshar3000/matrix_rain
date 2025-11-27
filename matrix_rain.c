@@ -110,7 +110,7 @@ void init_colors() {
 // Initialize tail size lookup (saving one division)
 void init_tail_lookup() {
 	tail_size_lookup = malloc(sizeof(int) * (MAX_STREAM_LENGTH - MIN_STREAM_LENGTH));
-	for(int i = 0; i < (MAX_STREAM_LENGTH - MIN_STREAM_LENGTH); ++i){
+	for(int i = 0; i < (MAX_STREAM_LENGTH - MIN_STREAM_LENGTH) + 1; ++i){
 	 tail_size_lookup[i] = (MIN_STREAM_LENGTH + i) / 4;
 	}
 }
