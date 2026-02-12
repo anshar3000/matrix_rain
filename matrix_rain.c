@@ -8,7 +8,7 @@
 #define MAX_STREAM_LENGTH 24
 #define MIN_STREAM_LENGTH 8
 #define MIN_STREAM_SPEED 1
-#define MAX_STREAM_SPEED 3
+#define MAX_STREAM_SPEED 4
 
 #define BLACK_ATTRIBUTE 1
 #define GREEN_ATTRIBUTE 2
@@ -111,7 +111,7 @@ void init_colors() {
 void init_tail_lookup() {
 	tail_size_lookup = malloc(sizeof(int) * (MAX_STREAM_LENGTH - MIN_STREAM_LENGTH));
 	for(int i = 0; i < (MAX_STREAM_LENGTH - MIN_STREAM_LENGTH) + 1; ++i){
-	 tail_size_lookup[i] = (MIN_STREAM_LENGTH + i) / 4;
+	 tail_size_lookup[i] = 2*(MIN_STREAM_LENGTH + i) / 5;
 	}
 }
 
@@ -172,7 +172,7 @@ void matrix_rain()
 		stream_info[i] = (stream) {-1, 0, 0};
 	}
 
-	const int probability_of_new_stream = 6; // out of 1024
+	const int probability_of_new_stream = 8; // out of 1024
 
 	while(true) 
 	{
@@ -200,7 +200,7 @@ void matrix_rain()
 		}
 		
 		refresh();
-		usleep(150000);  // 150 ms
+		usleep(100000);  // 100 ms
 	} 
 
 	free(stream_info);
