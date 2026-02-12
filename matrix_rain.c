@@ -187,8 +187,12 @@ void matrix_rain()
 				// start a new stream with some probability
 				// to avoid all streams starting at the same time
 				unsigned int rand_val = rand();
+        bool has_stream_left = (col_index != max_col - 1) && stream_info[col_index + 1].pos != -1;
+        bool has_stream_right = (col_index != 0) && stream_info[col_index - 1].pos != -1;
 
-				if((rand_val % 1024) > (1024 - probability_of_new_stream)) {
+				if((rand_val % 1024) > (1024 - probability_of_new_stream) &&
+            !has_stream_right && !has_stream_left)
+        {
 					s.pos = 0;
 					s.length = MIN_STREAM_LENGTH + (rand_val % (MAX_STREAM_LENGTH - MIN_STREAM_LENGTH));
 					s.speed = MIN_STREAM_SPEED + (rand_val % (MAX_STREAM_SPEED - MIN_STREAM_SPEED));
