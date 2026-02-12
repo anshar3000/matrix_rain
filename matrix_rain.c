@@ -188,7 +188,7 @@ void matrix_rain()
 				// to avoid all streams starting at the same time
 				unsigned int rand_val = rand();
         bool has_stream_left = (col_index != max_col - 1) && stream_info[col_index + 1].pos != -1;
-        bool has_stream_right = (col_index != 0) && stream_info[col_index - 1].pos != -1;
+        bool has_stream_right = has_stream_left && (col_index != 0) && stream_info[col_index - 1].pos != -1;
 
 				if((rand_val % 1024) > (1024 - probability_of_new_stream) &&
             !has_stream_right && !has_stream_left)
