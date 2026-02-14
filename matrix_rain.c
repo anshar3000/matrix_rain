@@ -1,9 +1,13 @@
+#include <bits/time.h>
+#include <bits/types/struct_itimerspec.h>
 #include <ncurses.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>	// sleep
 #include <string.h>
 #include <signal.h>
+#include <sys/timerfd.h>
 
 #define MAX_STREAM_LENGTH 24
 #define MIN_STREAM_LENGTH 8
@@ -30,6 +34,7 @@ char* grid = NULL;
 int* tail_size_lookup = NULL;
 int max_row = 0;
 int max_col = 0;
+int timerfd = 0;
 
 const char matrix_rain_chars[] =
 "abcdefghijklmnopqrstuvwxyz"
@@ -42,7 +47,8 @@ void handle_sigint(int sig) {
 	if(grid) free(grid);
 	if(stream_info) free(stream_info);
 	if(tail_size_lookup) free(tail_size_lookup);
-	endwin();
+	if(timerfd > 0) close(timerfd);
+  endwin();
 	exit(0);
 }
 
@@ -115,6 +121,30 @@ void init_tail_lookup() {
 	}
 }
 
+// Initialize timer with ms
+void init_timer(const unsigned int ms) {
+  struct itimerspec tv = (struct itimerspec){0};
+  timerfd = timerfd_create(CLOCK_MONOTONIC, 0); /* Global variable assignment */
+
+  // if timerfd is invalid, we'll just use usleep instead
+  if(timerfd < 0) {
+    goto _init_timer_error;
+  }
+  
+  // Set timer values
+  tv.it_value.tv_sec = 0;
+  tv.it_value.tv_nsec = ms * 100 * 100 * 100;
+  tv.it_interval.tv_sec = 0;
+  tv.it_interval.tv_nsec = ms * 100 * 100 * 100;
+
+  timerfd_settime(timerfd, 0, &tv, NULL);
+  return;
+
+_init_timer_error:
+  setbuf(stderr, NULL);
+  fprintf(stderr, "WARNING: timerfd error. Using usleep for timer interval management\n");
+}
+
 // Draw stream at column col_index, return updated stream info
 stream draw_stream(stream s, int col_index)
 {
@@ -163,16 +193,18 @@ stream draw_stream(stream s, int col_index)
 }
 
 // Make it rain, baby, rain
-void matrix_rain() 
+void matrix_rain(const int probability_of_new_stream,
+                 const unsigned int ms) 
 {
 	// marks the postion of the head of rain drop
 	stream_info = malloc(sizeof(stream) * max_col);
-	
+
+  // Initialize timer
+  init_timer(ms);
+
 	for(int i = 0; i < max_col; ++i) {
 		stream_info[i] = (stream) {-1, 0, 0};
 	}
-
-	const int probability_of_new_stream = 8; // out of 1024
 
 	while(true) 
 	{
@@ -185,10 +217,9 @@ void matrix_rain()
 			if(s.pos == -1) 
       {
 				// start a new stream with some probability
-				// to avoid all streams starting at the same time
 				unsigned int rand_val = rand();
-        bool has_stream_left = (col_index != max_col - 1) && stream_info[col_index + 1].pos != -1;
-        bool has_stream_right = has_stream_left && (col_index != 0) && stream_info[col_index - 1].pos != -1;
+	      bool has_stream_left = (col_index != max_col - 1) && stream_info[col_index + 1].pos != -1;
+     		bool has_stream_right = has_stream_left || ((col_index != 0) && stream_info[col_index - 1].pos != -1);
 
 				if((rand_val % 1024) > (1024 - probability_of_new_stream) &&
             !has_stream_right && !has_stream_left)
@@ -203,10 +234,16 @@ void matrix_rain()
 			stream_info[col_index] = draw_stream(s, col_index);
 		}
 		
-		refresh();
-		usleep(100000);  // 100 ms
+		if(timerfd < 0) {
+        usleep(ms * 1000);
+    } else {
+        read(timerfd, NULL, sizeof(uint64_t));
+    }
+		
+    refresh();
 	} 
 
+  if(timerfd > 0) close(timerfd);
 	free(stream_info);
 }
 
@@ -238,7 +275,7 @@ int main() {
 	curs_set(0);	// hide cursor
 	init_char_grid();
 	fill_grid();
-	matrix_rain();	
+	matrix_rain(16, 100);	
 	if(grid) free(grid);
 	if(tail_size_lookup) free(tail_size_lookup);
 	endwin();
