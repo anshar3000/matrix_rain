@@ -1,0 +1,4 @@
+added ms argument to argv
+split matrix_rain.c into various different module .c files. Added MAKEFILE. Removed build script.
+made stream_info a simple array instead of using a pool-allocated linked list
+in colors.c, get_attr_pair_given_dist, subtituted if block by switch 
