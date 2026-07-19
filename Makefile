@@ -1,8 +1,8 @@
 CC      = gcc
 CFLAGS  = -std=c11 -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 -Wall -Wextra -I.
 LDFLAGS = -lncursesw -lm
-SRCS    = main.c grid.c colors.c stream.c timer.c pool_list.c	
-OBJS    = $(SRCS:.c=.o) list.o allocator.o pool.o
+SRCS    = main.c grid.c colors.c stream.c timer.c pool_list.c list.c allocator.c pool.c
+OBJS    = $(SRCS:.c=.o)
 TARGET  = matrix_rain
 
 all: $(TARGET)
