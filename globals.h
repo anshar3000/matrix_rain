@@ -1,7 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#define MAX_STREAM_LENGTH 24
+#define MAX_STREAM_LENGTH 32
 #define MIN_STREAM_LENGTH 8
 #define MIN_STREAM_SPEED  1
 #define MAX_STREAM_SPEED  4
